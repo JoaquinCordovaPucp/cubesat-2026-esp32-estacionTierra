@@ -1,18 +1,23 @@
 //       |||    ESTACION A TIERRA   |||
 #include <RadioLib.h>
 //Struct del paquete:
+#pragma pack(push, 1)
 struct TelemetryPacket {
     uint8_t TYPE;
+    uint16_t SEQ;
+    uint32_t TIME;   // s * 10  -> décimas de segundo
+    uint32_t FLAGS;  // Bitfield de campos válidos
     uint16_t VOLT;   // mV  (V * 1000)
-    int16_t  INCX;   // rad * 1000
-    int16_t  INCY;   // rad * 1000
+    int16_t  PITCH;  // rad * 1000
+    int16_t  ROLL;   // rad * 1000
     int32_t  LON;    // deg * 1e7
     int32_t  LAT;    // deg * 1e7
-    uint32_t TIME;   // s * 10  -> décimas de segundo
     int16_t  VVEL;   // m/s * 10
     uint32_t PRES;   // Pa
     uint16_t TEMP;   // K * 100
     uint16_t ECO2;   // ppm
+    uint16_t ETOH;   // ppm
+    uint8_t  AQI;    // 1-5
     uint16_t UV;     // UV * 100
     int16_t  GYRX;   // rad/s * 1000
     int16_t  GYRY;   // rad/s * 1000
@@ -20,9 +25,10 @@ struct TelemetryPacket {
     int16_t  ACCX;   // m/s^2 * 1000
     int16_t  ACCY;   // m/s^2 * 1000
     int16_t  ACCZ;   // m/s^2 * 1000
-    uint16_t ALT;    // m * 10
+    int16_t  ALT;    // m * 10
     uint16_t CHK;    // CRC-16
 };
+#pragma pack(pop)
 
 //Definir funciones
 bool verificarPaqueteDato(String str);
@@ -101,26 +107,9 @@ void loop (){
                     TelemetryPacket* pkt = (TelemetryPacket*)buffer;
 
                     // CSV en una sola linea con todos los campos recibidos del paquete.
-                    Serial.print(pkt->TYPE); Serial.print(',');
-                    Serial.print(pkt->VOLT); Serial.print(',');
-                    Serial.print(pkt->INCX); Serial.print(',');
-                    Serial.print(pkt->INCY); Serial.print(',');
-                    Serial.print(pkt->LON);  Serial.print(',');
-                    Serial.print(pkt->LAT);  Serial.print(',');
-                    Serial.print(pkt->TIME); Serial.print(',');
-                    Serial.print(pkt->VVEL); Serial.print(',');
-                    Serial.print(pkt->PRES); Serial.print(',');
-                    Serial.print(pkt->TEMP); Serial.print(',');
-                    Serial.print(pkt->ECO2); Serial.print(',');
-                    Serial.print(pkt->UV);   Serial.print(',');
-                    Serial.print(pkt->GYRX); Serial.print(',');
-                    Serial.print(pkt->GYRY); Serial.print(',');
-                    Serial.print(pkt->GYRZ); Serial.print(',');
                     Serial.print(pkt->ACCX); Serial.print(',');
                     Serial.print(pkt->ACCY); Serial.print(',');
                     Serial.print(pkt->ACCZ); Serial.print(',');
-                    Serial.print(pkt->ALT);  Serial.print(',');
-                    Serial.println(pkt->CHK);
                     
                     radio.startReceive();   // Aca vuelvo a escuchar, xq el cambio que hago en **** es solo si es que estaba TX a RX, por lo que le debo decir que siga escuchando, LUEGO DE QUE YA RECIBIO ALGO
                 }
